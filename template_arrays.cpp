@@ -15,33 +15,35 @@ struct MultiMatrix < T, arg > {
 	using type = T[arg];
 };
 
-template <class T, size_t arg1, size_t... argx>
-class Matrix{
-	private:
-		typename MultiMatrix<T, arg1, argx...>::type data;
-		friend T& access_MultiMatrix(typename MultiMatrix< T, arg1, argx... >::type &matrix, std::queue<size_t> &indexing);
-		friend T& access_MultiMatrix(typename MultiMatrix< T, arg1 >::type &matrix, std::queue<size_t> &indexing);
-	public:
-		T& operator()(std::queue<size_t> &indexing){
-			return access_MultiMatrix<T, arg1, argx...>(data, indexing);
-		}
-};
+template <class T, size_t arg1>
+T& access_MultiMatrix(typename MultiMatrix< T, arg1 >::type &matrix, std::queue<size_t> &indexing){
+	size_t i{ indexing.front() };
+	assert(i < arg1);
+	indexing.pop();
+	return matrix[i];
+}
 
 template <class T, size_t arg1, size_t arg2, size_t... args>
 T& access_MultiMatrix( typename MultiMatrix< T, arg1, arg2, args... >::type &matrix, std::queue<size_t> &indexing ){
 	size_t i{ indexing.front() };
-	assert(("index out of range",i < arg1));
+	assert(i < arg1);
 	indexing.pop();
 	return access_MultiMatrix<T, arg2, args...>(matrix[i], indexing);
 }
 
-template <class T, size_t arg1>
-T& access_MultiMatrix(typename MultiMatrix< T, arg1 >::type &matrix, std::queue<size_t> &indexing){
-	size_t i{ indexing.front() };
-	assert(("index out of range",i < arg1));
-	indexing.pop();
-	return matrix[i];
-}
+template <class T, size_t arg1, size_t... argx>
+class Matrix{
+	private:
+		typename MultiMatrix<T, arg1, argx...>::type data_;
+		friend T& access_MultiMatrix<T, arg1, argx...>(typename MultiMatrix< T, arg1, argx... >::type &matrix, std::queue<size_t> &indexing);
+		friend T& access_MultiMatrix<T, arg1>(typename MultiMatrix< T, arg1 >::type &matrix, std::queue<size_t> &indexing);
+	public:
+		Matrix() = default;
+		~Matrix() = default;
+		T& operator()(std::queue<size_t> &&indexing){
+			return access_MultiMatrix<T, arg1, argx...>(data_, indexing);
+		}
+};
 
 int main(){
 	Matrix< int, 2, 2 > m2x2;
