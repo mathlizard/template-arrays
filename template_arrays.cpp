@@ -2,7 +2,7 @@
 #include <queue>
 #include <assert.h>
 
-#define ID(...) { std::queue<size_t>({__VA_ARGS__}) }
+#define ID(...) std::queue<size_t>({__VA_ARGS__})
 
 template <class T, size_t arg1, size_t... argn>
 struct MultiMatrix{
